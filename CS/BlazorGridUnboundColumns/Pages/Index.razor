@@ -1,0 +1,45 @@
+﻿@page "/"
+
+@using BlazorGridUnboundColumns.Data
+@inject WeatherForecastService ForecastService
+
+
+<DxGrid Data="@forecasts"
+        UnboundColumnData="Grid_CustomUnboundColumnData">
+    <Columns>
+        <DxGridDataColumn Caption="Date" FieldName="Date" />
+        <DxGridDataColumn Caption="@("Temperature (\x2103)")" FieldName="TemperatureC" />
+        <DxGridDataColumn FieldName="TemperatureF"
+                          Caption="@("Temperature (\x2109)")"
+                          UnboundType="GridUnboundColumnType.Decimal"
+                          UnboundExpression="32 + TemperatureC / 0.5556" />
+        <DxGridDataColumn FieldName="Summary"
+                          UnboundType="GridUnboundColumnType.String" />
+    </Columns>
+</DxGrid>
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync() {
+        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+    }
+
+    void Grid_CustomUnboundColumnData(GridUnboundColumnDataEventArgs e) {
+        if (e.FieldName == "Summary") {
+            int temperature = (int)(e.GetRowValue("TemperatureC"));
+            if (temperature < -10) {
+                e.Value = "Cool";
+            }
+            else if (temperature >= -10 && temperature < 5) {
+                e.Value = "Chilly";
+            }
+            else if (temperature >= 5 && temperature < 15) {
+                e.Value = "Warm";
+            }
+            else if (temperature >= 15) {
+                e.Value = "Hot";
+            }
+        }
+    }
+}
