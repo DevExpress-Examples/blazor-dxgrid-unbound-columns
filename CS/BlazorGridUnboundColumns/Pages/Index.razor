@@ -27,19 +27,20 @@
 
     void Grid_CustomUnboundColumnData(GridUnboundColumnDataEventArgs e) {
         if (e.FieldName == "Summary") {
-            int temperature = (int)(e.GetRowValue("TemperatureC"));
-            if (temperature < -10) {
-                e.Value = "Cool";
-            }
-            else if (temperature >= -10 && temperature < 5) {
-                e.Value = "Chilly";
-            }
-            else if (temperature >= 5 && temperature < 15) {
-                e.Value = "Warm";
-            }
-            else if (temperature >= 15) {
-                e.Value = "Hot";
-            }
+            int temperature = Convert.ToInt32(e.GetRowValue("TemperatureC"));
+            e.Value = GetTemperatureString(temperature);
         }
+    }
+
+    string GetTemperatureString(int value) {
+        if (value < -10)
+            return "Cool";
+        if (value >= -10 && value < 5)
+            return "Chilly";
+        if (value >= 5 && value < 15)
+            return "Warm";
+        if (value >= 15)
+            return "Hot";
+        return null;
     }
 }
