@@ -3,12 +3,15 @@
 @using BlazorGridUnboundColumns.Data
 @inject WeatherForecastService ForecastService
 
-
 <DxGrid Data="@forecasts"
-        UnboundColumnData="Grid_CustomUnboundColumnData">
+        UnboundColumnData="Grid_CustomUnboundColumnData"
+        CustomizeEditModel="Grid_CustomizeEditModel"
+        EditModelSaving="Grid_EditModelSaving">
     <Columns>
+        <DxGridCommandColumn NewButtonVisible="false" 
+                             DeleteButtonVisible="false"
+                             Width="10%" />
         <DxGridDataColumn Caption="Date" FieldName="Date" />
-        <DxGridDataColumn Caption="@("Temperature (\x2103)")" FieldName="TemperatureC" />
         <DxGridDataColumn FieldName="TemperatureF"
                           Caption="@("Temperature (\x2109)")"
                           UnboundType="GridUnboundColumnType.Decimal"
@@ -16,6 +19,19 @@
         <DxGridDataColumn FieldName="Summary"
                           UnboundType="GridUnboundColumnType.String" />
     </Columns>
+    <EditFormTemplate Context="editFormContext">
+        @{
+            var forecast = (EditableWeatherForecast)editFormContext.EditModel;
+        }
+        <DxFormLayout>
+            <DxFormLayoutItem Caption="Date:">
+                @editFormContext.GetEditor("Date")
+            </DxFormLayoutItem>
+            <DxFormLayoutItem Caption="Temperature">
+                <DxSpinEdit @bind-Value="forecast.TemperatureF" Mask="f1" />
+            </DxFormLayoutItem>
+        </DxFormLayout>
+    </EditFormTemplate>
 </DxGrid>
 
 @code {
@@ -42,5 +58,22 @@
         if (value >= 15)
             return "Hot";
         return null;
+    }
+
+    void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
+        var dataItem = (WeatherForecast)e.DataItem;
+        e.EditModel = new EditableWeatherForecast {
+            Date = dataItem.Date,
+            TemperatureC = dataItem.TemperatureC
+        };
+    }
+
+    void Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
+        var editModel = (EditableWeatherForecast)e.EditModel;
+        var dataItem = (WeatherForecast)e.DataItem;
+        if (dataItem != null) {
+            dataItem.Date = editModel.Date;
+            dataItem.TemperatureC = editModel.TemperatureC;
+        }
     }
 }
